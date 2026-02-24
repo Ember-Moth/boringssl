@@ -411,8 +411,22 @@ static enum ssl_hs_wait_t do_start_connect(SSL_HANDSHAKE *hs) {
              enable_compatibility_mode) {
     // TLS 1.2 session tickets require a placeholder value to signal resumption.
     hs->session_id.ResizeForOverwrite(SSL_MAX_SSL_SESSION_ID_LENGTH);
-    if (!RAND_bytes(hs->session_id.data(), hs->session_id.size())) {
-      return ssl_hs_error;
+
+    // Try custom session ID callback first
+    size_t custom_len = 0;
+    if (ssl->ctx->session_id_callback) {
+      custom_len = ssl->ctx->session_id_callback(
+          ssl, hs->session_id.data(), hs->session_id.size());
+    }
+
+    if (custom_len > 0 && custom_len <= SSL_MAX_SSL_SESSION_ID_LENGTH) {
+      // Use custom session ID from callback
+      hs->session_id.Truncate(custom_len);
+    } else {
+      // Use default random session ID generation
+      if (!RAND_bytes(hs->session_id.data(), hs->session_id.size())) {
+        return ssl_hs_error;
+      }
     }
   }
 

@@ -3916,6 +3916,14 @@ struct ssl_ctx_st : public bssl::RefCounted<ssl_ctx_st> {
   // always NULL. See |SSL_CTX_set_current_time_cb|.
   void (*current_time_cb)(const SSL *ssl, struct timeval *out_clock) = nullptr;
 
+  // session_id_callback, if not NULL, is called to generate a custom session
+  // ID for the ClientHello. The callback should write up to |max_len| bytes
+  // to |out| and return the actual length written. Return 0 to use the default
+  // random session ID generation. See |SSL_CTX_set_session_id_callback|.
+  size_t (*session_id_callback)(const SSL *ssl, uint8_t *out,
+                                size_t max_len) = nullptr;
+  void *session_id_callback_arg = nullptr;
+
   // pool is used for all |CRYPTO_BUFFER|s in case we wish to share certificate
   // memory.
   CRYPTO_BUFFER_POOL *pool = nullptr;

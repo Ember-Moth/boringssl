@@ -2863,6 +2863,13 @@ void SSL_CTX_set_current_time_cb(SSL_CTX *ctx,
   ctx->current_time_cb = cb;
 }
 
+void SSL_CTX_set_session_id_callback(
+    SSL_CTX *ctx,
+    size_t (*cb)(const SSL *ssl, uint8_t *out, size_t max_len), void *arg) {
+  ctx->session_id_callback = cb;
+  ctx->session_id_callback_arg = arg;
+}
+
 int SSL_can_release_private_key(const SSL *ssl) {
   if (ssl_can_renegotiate(ssl)) {
     // If the connection can renegotiate (client only), the private key may be

@@ -4898,6 +4898,19 @@ OPENSSL_EXPORT void (*SSL_CTX_get_keylog_callback(const SSL_CTX *ctx))(
 OPENSSL_EXPORT void SSL_CTX_set_current_time_cb(
     SSL_CTX *ctx, void (*cb)(const SSL *ssl, struct timeval *out_clock));
 
+// SSL_CTX_set_session_id_callback configures a callback to generate custom
+// session IDs for ClientHello messages. The callback should write up to
+// |max_len| bytes to |out| and return the actual length written (up to 32
+// bytes). Return 0 to use the default random session ID generation. The |arg|
+// parameter is passed through from |SSL_CTX_set_session_id_callback|.
+//
+// This is primarily useful for testing purposes. In production, session IDs
+// should be randomly generated. In TLS 1.3, session IDs are used only for
+// middlebox compatibility mode and have no cryptographic significance.
+OPENSSL_EXPORT void SSL_CTX_set_session_id_callback(
+    SSL_CTX *ctx,
+    size_t (*cb)(const SSL *ssl, uint8_t *out, size_t max_len), void *arg);
+
 // SSL_set_shed_handshake_config allows some of the configuration of |ssl| to be
 // freed after its handshake completes.  Once configuration has been shed, APIs
 // that query it may fail.  "Configuration" in this context means anything that
